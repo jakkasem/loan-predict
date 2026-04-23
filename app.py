@@ -7,7 +7,7 @@ from workflow import run_suggest
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 class LoanInput(BaseModel):
     final_d: int
