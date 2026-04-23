@@ -6,6 +6,8 @@ from workflow import run_suggest
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+VERSION = "1.0.0"
+
 app = FastAPI()
 
 improver = ImproveModel(
@@ -16,7 +18,7 @@ improver = ImproveModel(
 
 @app.get("/")
 def home():
-    return {"message": "ML API is running"}
+    return {"message": "ML API is running", "version": VERSION}
 
 @app.post("/predict")
 def get_prediction(data: dict):
