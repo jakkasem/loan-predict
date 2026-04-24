@@ -1,2 +1,0 @@
-final_d,emp_length_int,home_ownership,income_category,annual_inc,income_cat,loan_amount,term,term_cat,purpose,purpose_cat,interest_payments,interest_payment_cat,interest_rate,grade,grade_cat,dti,total_pymnt,total_rec_prncp,recoveries,installment,region,loan_condition
-1012015,10.0,RENT,Low,24000,1,5000, 36 months,1,credit_card,1,Low,1,10.65,B,2,27.65,5861.071414,21965.7,22162.2,162.87,munster,0
