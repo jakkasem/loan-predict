@@ -1,4 +1,4 @@
-import seaborn as sns
+# import seaborn as sns
 import numpy as np
 import pandas as pd
 import joblib
@@ -29,9 +29,9 @@ le = LabelEncoder()
 model = RandomForestClassifier(random_state=42)
 
 param_grid = {
- 'model__n_estimators': [100,200,300,400,500],
+ 'model__n_estimators': [100],
  'model__max_features': ['sqrt'],
- 'model__max_depth': [5,6,7,8,9,10,11,12], 
+ 'model__max_depth': [11], 
  'model__criterion': ['gini', 'entropy'] 
 }
 
