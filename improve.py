@@ -3,6 +3,9 @@
 import pandas as pd
 import joblib
 import dice_ml
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class ImproveModel:
 
@@ -118,9 +121,9 @@ class ImproveModel:
         })
     
 _model_instance = ImproveModel(
-    model_path=r"C:\Python_Project\Loan_Data\model.pkl",
-    le_path=r"C:\Python_Project\Loan_Data\label_encoder.pkl",
-    data_path=r"C:\Python_Project\Loan_Data\dice_data.pkl"
+    model_path=os.path.join(BASE_DIR, "model.pkl"),
+    le_path=os.path.join(BASE_DIR, "label_encoder.pkl"),
+    data_path=os.path.join(BASE_DIR, "dice_data.pkl")
 )
 
 def improve(input_json):
