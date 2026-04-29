@@ -5,7 +5,4 @@ pandas
 numpy
 joblib
 dice-ml
-langgraph
 python-dotenv
-sqlalchemy
-psycopg2-binary
