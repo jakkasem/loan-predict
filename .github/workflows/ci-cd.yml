@@ -62,14 +62,9 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
+            cd ~/apps
             echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/${{ github.repository }}:latest
-            docker stop loan-predict || true
-            docker rm loan-predict || true
-            docker run -d \
-              --name loan-predict \
-              --restart always \
-              -p 8000:8000 \
-              --env-file /home/${{ secrets.SSH_USER }}/.env \
-              ghcr.io/${{ github.repository }}:latest
+            docker compose pull loan-predict
+            docker compose up -d --force-recreate loan-predict
