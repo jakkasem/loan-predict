@@ -16,18 +16,13 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sqlalchemy import create_engine
+from xgboost import XGBClassifier
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 le = LabelEncoder()
-model = RandomForestClassifier(random_state=42)
-
-param_grid = {
- 'model__n_estimators': [100],
- 'model__max_features': ['sqrt'],
- 'model__max_depth': [12], 
- 'model__criterion': ['gini', 'entropy'] 
-}
+# model = RandomForestClassifier(random_state=42)
+model = XGBClassifier(random_state=42)
 
 # host = 'localhost'
 # db = 'mydb' 
@@ -44,10 +39,13 @@ port = '5432'
 connection_url = f"postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}"
 engine = create_engine(connection_url)
 
+# random forest Accuracy: 98.9
+# xgboost Accuracy: 99.0
 query = "SELECT final_d, emp_length_int, home_ownership_cat, income_cat, annual_inc, loan_amount, term_cat " \
     ", application_type_cat, purpose_cat, interest_payment_cat, interest_rate, grade, dti, total_pymnt " \
     ", total_rec_prncp, recoveries, installment, loan_condition_cat" \
-    " FROM loan.customer" # ใส่ชื่อ Table ของคุณ
+" FROM loan.customer" 
+
 data = pd.read_sql(query, engine)
 
 data1=data.dropna(subset=['loan_condition_cat'])
@@ -58,8 +56,13 @@ X = data1.drop('loan_condition_cat', axis=1)
 y = data1['loan_condition_cat']
 y = le.fit_transform(y)
 
-cat_cols = X.select_dtypes(include=['object', 'string']).columns
-num_cols = X.select_dtypes(exclude='object').columns
+cat_cols = X.select_dtypes(
+    include=['object', 'string']
+).columns
+
+num_cols = X.select_dtypes(
+    include=['int64', 'float64']
+).columns
 
 preprocessor = ColumnTransformer([
     ("num", StandardScaler(), num_cols),
@@ -71,37 +74,34 @@ pipeline = Pipeline([
     ("model", model)
 ])
 
-grid = GridSearchCV(
-    pipeline,
-    param_grid,
-    cv=3,
-    scoring="accuracy"
-)
-
 feature_names = X.columns
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.33, random_state=42
+    X, y, test_size=0.30, random_state=42
 )
-grid.fit(X_train, y_train)
-print(grid.best_params_)
-best_model = grid.best_estimator_
+pipeline.fit(X_train, y_train)
+best_model = pipeline
 y_pred = best_model.predict(X_test)
-print("Accuracy:", accuracy_score(y_test, y_pred))
+# print(model.get_params())
+print("Accuracy:", accuracy_score(y_test, y_pred)*100)
 
 model1 = best_model.named_steps["model"]
 
 # ดึง preprocessor
 preprocess = best_model.named_steps["preprocess"]
 
-# แยก encoder
-ohe = preprocess.named_transformers_["cat"]
+# ถ้ามี categorical columns
+if len(cat_cols) > 0:
 
-# ดึงชื่อ feature หลัง encode
-encoded_cols = ohe.get_feature_names_out(cat_cols)
+    ohe = preprocess.named_transformers_["cat"]
 
-# รวม feature ทั้งหมด
-all_features = list(num_cols) + list(encoded_cols)
+    encoded_cols = ohe.get_feature_names_out(cat_cols)
+
+    all_features = list(num_cols) + list(encoded_cols)
+
+else:
+
+    all_features = list(num_cols)
 
 # สร้าง importance
 importance = pd.DataFrame({
@@ -111,7 +111,7 @@ importance = pd.DataFrame({
 
 importance = importance.sort_values("importance", ascending=False)
 
-# print(importance.head(20))
+# print(importance.head(6))
 
 # joblib.dump(fc1, r"C:\Python_Project\Loan_Data\model.pkl")
 # joblib.dump(scale, r"C:\Python_Project\Loan_Data\scaler.pkl")
